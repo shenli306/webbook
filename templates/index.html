@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐱 猫娘小说下载器 - 七书网专用版</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            color: #333;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* 可爱的背景装饰 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(255, 182, 255, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(182, 255, 255, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 255, 182, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 60% 70%, rgba(255, 182, 182, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.3), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255, 182, 255, 0.4), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(182, 255, 255, 0.4), transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255, 255, 182, 0.4), transparent);
+            background-repeat: repeat;
+            background-size: 150px 150px;
+            animation: sparkle 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        @keyframes sparkle {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-150px); }
+        }
+        
+        /* 浮动的猫爪印装饰 */
+        .paw-print {
+            position: fixed;
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+        
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .sidebar {
+            width: 400px;
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #ff5252, #ff7979);
+            background-clip: content-box;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            font-weight: 800;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e, #ffa8a8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            0% { filter: drop-shadow(0 0 5px rgba(255, 107, 107, 0.5)); }
+            100% { filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.8)); }
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            font-weight: 600;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.6), 
+                rgba(255, 182, 255, 0.4),
+                rgba(182, 255, 255, 0.4),
+                transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .card::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff);
+            border-radius: 27px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .card:hover::before {
+            left: 100%;
+        }
+        
+        .card:hover::after {
+            opacity: 1;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+        
+        .card h2 {
+            color: #ff6b6b;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .card h3 {
+            color: #ff8e8e;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .search-section {
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 18px 25px;
+            border: 3px solid transparent;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.1);
+        }
+        
+        .search-input::placeholder {
+            color: #ff9999;
+            font-weight: 400;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 
+                0 0 0 4px rgba(255, 107, 107, 0.1),
+                0 8px 25px rgba(255, 107, 107, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 300% 300%;
+            animation: gradientButton 3s ease infinite;
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 6px 20px rgba(255, 107, 107, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        @keyframes gradientButton {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.4), 
+                rgba(255, 182, 255, 0.3),
+                rgba(182, 255, 255, 0.3),
+                transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .btn::after {
+            content: '✨';
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover::after {
+            opacity: 1;
+            right: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 12px 35px rgba(255, 107, 107, 0.4),
+                0 0 0 3px rgba(255, 255, 255, 0.2);
+            padding-right: 45px;
+        }
+        
+        .btn:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 300% 300%;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 
+                0 12px 35px rgba(102, 126, 234, 0.4),
+                0 0 0 3px rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 50%, #ff9a9e 100%);
+            background-size: 300% 300%;
+            color: #8B4513;
+            box-shadow: 0 8px 25px rgba(252, 182, 159, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 
+                0 12px 35px rgba(252, 182, 159, 0.4),
+                0 0 0 3px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 50%, #56ab2f 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        }
+        
+        .btn-success:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        .btn:disabled::before {
+            display: none;
+        }
+
+        .search-results {
+            display: none;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        .search-results::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .search-results::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .search-results::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            border-radius: 10px;
+        }
+
+        .novel-item {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 6px 20px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .novel-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 182, 255, 0.3), 
+                rgba(182, 255, 255, 0.3),
+                transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .novel-item::after {
+            content: '📚';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.2em;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .novel-item:hover::before {
+            left: 100%;
+        }
+        
+        .novel-item:hover::after {
+            opacity: 1;
+            transform: rotate(10deg);
+        }
+        
+        .novel-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            background: rgba(255, 255, 255, 0.18);
+            box-shadow: 
+                0 12px 35px rgba(0, 0, 0, 0.15),
+                0 0 0 2px rgba(255, 107, 107, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .novel-item.selected {
+            border-color: #ff6b6b;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 142, 142, 0.05));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.2);
+        }
+        .novel-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            line-height: 1.3;
+            text-shadow: 0 1px 2px rgba(255, 107, 107, 0.1);
+        }
+
+        .novel-author {
+            color: #ff8e8e;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        
+        .novel-author::before {
+            content: '✍️ ';
+            margin-right: 5px;
+        }
+
+        .novel-intro {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.5;
+            text-align: justify;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .novel-details {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            width: 100px;
+            color: #555;
+        }
+
+        .detail-value {
+            flex: 1;
+            color: #333;
+        }
+
+        .download-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .chapter-range {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .chapter-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .chapter-input {
+            width: 80px;
+            padding: 15px 20px;
+            border: 2px solid transparent;
+            border-radius: 18px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 4px 15px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            color: #333;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .chapter-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid transparent;
+            box-shadow: 
+                0 0 0 3px rgba(255, 107, 107, 0.3),
+                0 6px 25px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px) scale(1.01);
+        }
+        
+        .chapter-input:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+            box-shadow: 
+                0 6px 20px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .progress-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .download-link {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .download-link a {
+            text-decoration: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 107, 107, 0.2);
+            border-top: 3px solid #ff6b6b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-section {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 1.1em;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+        
+        .results-header {
+            text-align: center;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.1em;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.2em;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .error {
+            text-align: center;
+            padding: 20px;
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+        
+        .novel-hover-text {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            color: #ff6b6b;
+            font-size: 0.9em;
+            margin-top: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .message {
+            padding: 20px 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 0.95em;
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+            animation: messageSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            animation: messageShine 2s ease-in-out infinite;
+        }
+        
+        @keyframes messageShine {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+
+        .message.success {
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(86, 171, 47, 0.05));
+            color: #2d5a27;
+            border-color: rgba(78, 205, 196, 0.3);
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.1);
+        }
+        
+        .message.success::before {
+            background: linear-gradient(90deg, transparent, rgba(78, 205, 196, 0.5), transparent);
+        }
+
+        .message.error {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 142, 142, 0.05));
+            color: #8b2635;
+            border-color: rgba(255, 107, 107, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.1);
+        }
+        
+        .message.error::before {
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 107, 0.5), transparent);
+        }
+
+        .message.info {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.05));
+            color: #1e3a8a;
+            border-color: rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+        
+        .message.info::before {
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.5), transparent);
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                margin-bottom: 10px;
+            }
+            
+            .chapter-row {
+                font-size: 0.9em;
+            }
+            
+            .chapter-input {
+                width: 60px;
+                padding: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 可爱的猫爪印装饰 -->
+    <div class="paw-print" style="top: 10%; left: 5%; animation-delay: 0s;">🐾</div>
+    <div class="paw-print" style="top: 20%; right: 8%; animation-delay: 1s;">🐾</div>
+    <div class="paw-print" style="top: 60%; left: 3%; animation-delay: 2s;">🐾</div>
+    <div class="paw-print" style="top: 80%; right: 5%; animation-delay: 3s;">🐾</div>
+    <div class="paw-print" style="top: 40%; left: 90%; animation-delay: 4s;">🐾</div>
+    <div class="paw-print" style="top: 70%; left: 85%; animation-delay: 5s;">🐾</div>
+    
+    <div class="container">
+        <!-- 主内容区域 -->
+        <div class="main-content">
+            <div class="header">
+                <h1>🐱 猫娘小说下载器</h1>
+                <p>七书网专用版 - 让下载小说变得简单又可爱喵～</p>
+            </div>
+
+            <!-- 搜索区域 -->
+            <div class="card search-section">
+                <h2>🔍 搜索小说</h2>
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="search-input" placeholder="输入小说名称或作者名喵～" onkeypress="handleSearchKeyPress(event)">
+                    <button class="btn btn-primary" onclick="searchNovels()">搜索</button>
+                </div>
+                
+                <div id="searchResults" class="search-results">
+                    <h3>搜索结果：</h3>
+                    <div id="novelList"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧边栏 -->
+        <div class="sidebar">
+            <!-- 小说详情区域 -->
+            <div class="card" id="novelDetails" style="display: none;">
+                <h2>📖 小说详情</h2>
+                <div id="detailsContent"></div>
+                
+                <div class="download-section">
+                     <h3>📥 下载设置</h3>
+                     <div class="chapter-range">
+                         <div class="chapter-row">
+                             <span>从第</span>
+                             <input type="number" id="startChapter" class="chapter-input" value="1" min="1">
+                             <span>章</span>
+                         </div>
+                         <div class="chapter-row">
+                             <span>到第</span>
+                             <input type="number" id="endChapter" class="chapter-input" placeholder="最后">
+                             <span>章（留空下载全部）</span>
+                         </div>
+                     </div>
+                     <button class="btn btn-success" id="downloadButton" onclick="startDownload()">📚 开始下载 EPUB</button>
+                 </div>
+            </div>
+
+            <!-- 下载进度区域 -->
+            <div class="card progress-section" id="progressSection">
+                <h2>📊 下载进度</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">准备中...</div>
+                <div class="download-link" id="downloadLink">
+                    <a href="#" id="downloadBtn" class="btn btn-primary" style="display: inline-block; margin-top: 10px;">📚 下载 EPUB 文件</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedNovel = null;
+        let currentTaskId = null;
+
+        function handleSearchKeyPress(event) {
+            if (event.key === 'Enter') {
+                searchNovels();
+            }
+        }
+
+        async function searchNovels() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (!keyword) {
+                showMessage('请输入搜索关键词喵～', 'error');
+                return;
+            }
+
+            const searchBtn = event.target;
+            const originalText = searchBtn.innerHTML;
+            searchBtn.innerHTML = '<div class="loading"></div>🐱 正在搜索中...';
+            searchBtn.disabled = true;
+
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ keyword })
+                });
+
+                console.log('搜索响应状态:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('搜索结果:', data);
+                
+                if (data.success) {
+                    if (data.results && data.results.length > 0) {
+                        displaySearchResults(data.results);
+                    } else {
+                        showMessage('😿 没有找到相关小说', 'error');
+                    }
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            } catch (error) {
+                console.error('搜索出错:', error);
+                showMessage('❌ 搜索失败，请重试喵～' + error.message, 'error');
+            } finally {
+                searchBtn.innerHTML = originalText;
+                searchBtn.disabled = false;
+            }
+        }
+
+        function displaySearchResults(results) {
+            const resultsDiv = document.getElementById('searchResults');
+            const novelList = document.getElementById('novelList');
+            
+            novelList.innerHTML = '';
+            
+            // 显示搜索结果数量
+            const resultCount = document.createElement('p');
+            resultCount.style.color = '#666';
+            resultCount.style.marginBottom = '15px';
+            resultCount.textContent = `🎉 找到 ${results.length} 本小说喵！`;
+            novelList.appendChild(resultCount);
+            
+            results.forEach((novel, index) => {
+                const novelDiv = document.createElement('div');
+                novelDiv.className = 'novel-item';
+                novelDiv.onclick = () => selectNovel(novel, novelDiv);
+                
+                const author = novel.author || '神秘作者';
+                const intro = novel.intro || '暂无简介';
+                
+                novelDiv.innerHTML = `
+                    <div class="novel-title">📖 ${novel.title}</div>
+                    <div class="novel-author">✍️ 作者：${author}</div>
+                    <div class="novel-intro">${intro}</div>
+                    <div class="novel-hover-text" style="opacity: 0; transition: opacity 0.3s ease; color: #ff6b6b; font-size: 0.9em; margin-top: 8px;">点击查看详情 ✨</div>
+                `;
+                
+                // 添加悬停效果
+                novelDiv.addEventListener('mouseenter', () => {
+                    const hoverText = novelDiv.querySelector('.novel-hover-text');
+                    if (hoverText) hoverText.style.opacity = '1';
+                });
+                
+                novelDiv.addEventListener('mouseleave', () => {
+                    const hoverText = novelDiv.querySelector('.novel-hover-text');
+                    if (hoverText) hoverText.style.opacity = '0';
+                });
+                
+                // 添加动画效果
+                novelDiv.style.opacity = '0';
+                novelDiv.style.transform = 'translateY(20px)';
+                
+                novelList.appendChild(novelDiv);
+                
+                // 延迟显示动画
+                setTimeout(() => {
+                    novelDiv.style.transition = 'all 0.5s ease';
+                    novelDiv.style.opacity = '1';
+                    novelDiv.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+            
+            resultsDiv.style.display = 'block';
+        }
+
+        async function selectNovel(novel, element) {
+            // 清除之前的选中状态
+            document.querySelectorAll('.novel-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // 设置当前选中
+            element.classList.add('selected');
+            selectedNovel = novel;
+            
+            // 获取详细信息
+            try {
+                const response = await fetch('/novel_info', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: novel.url })
+                });
+                
+                const data = await response.json();
+                
+                console.log('获取到的小说详情数据:', data);
+                console.log('小说信息:', data.novel_info);
+                
+                if (data.success) {
+                    displayNovelDetails(data.novel_info, data.chapter_count);
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('获取小说信息失败喵：' + error.message, 'error');
+            }
+        }
+
+        function displayNovelDetails(novelInfo, chapterCount) {
+            const detailsDiv = document.getElementById('novelDetails');
+            const contentDiv = document.getElementById('detailsContent');
+            
+            // 添加空值检查和默认值处理
+            const title = novelInfo.title || '未知书名';
+            const author = novelInfo.author || '神秘作者';
+            const intro = novelInfo.intro || '暂无简介，等待发现更多精彩内容喵～';
+            
+            contentDiv.innerHTML = `
+                <div class="detail-row">
+                    <div class="detail-label">📖 书名：</div>
+                    <div class="detail-value">${title}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">✍️ 作者：</div>
+                    <div class="detail-value">${author}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">📚 章节数：</div>
+                    <div class="detail-value">${chapterCount} 章</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">📝 简介：</div>
+                    <div class="detail-value" style="line-height: 1.6; max-height: 200px; overflow-y: auto;">${intro}</div>
+                </div>
+            `;
+            
+            // 设置章节范围
+            document.getElementById('endChapter').placeholder = chapterCount;
+            document.getElementById('endChapter').max = chapterCount;
+            
+            detailsDiv.style.display = 'block';
+        }
+
+        async function startDownload() {
+            if (!selectedNovel) {
+                showMessage('请先选择一本小说喵～', 'error');
+                return;
+            }
+            
+            const startChapter = parseInt(document.getElementById('startChapter').value) || 1;
+            const endChapterInput = document.getElementById('endChapter').value;
+            const endChapter = endChapterInput ? parseInt(endChapterInput) : null;
+            
+            try {
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url: selectedNovel.url,
+                        start_chapter: startChapter,
+                        end_chapter: endChapter
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentTaskId = data.task_id;
+                    showProgressSection();
+                    monitorProgress();
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('启动下载失败喵：' + error.message, 'error');
+            }
+        }
+
+        function showProgressSection() {
+            document.getElementById('progressSection').style.display = 'block';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressText').textContent = '准备中...';
+            document.getElementById('downloadLink').style.display = 'none';
+        }
+
+        async function monitorProgress() {
+            if (!currentTaskId) return;
+            
+            try {
+                const response = await fetch(`/status/${currentTaskId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const status = data.data;
+                    
+                    document.getElementById('progressFill').style.width = status.progress + '%';
+                    document.getElementById('progressText').textContent = status.message;
+                    
+                    if (status.status === 'completed') {
+                        showMessage('下载完成喵～', 'success');
+                        showDownloadLink(status.filename);
+                    } else if (status.status === 'error') {
+                        showMessage(status.message, 'error');
+                    } else {
+                        // 继续监控
+                        setTimeout(monitorProgress, 1000);
+                    }
+                } else {
+                    showMessage('获取进度失败喵：' + data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('监控进度失败喵：' + error.message, 'error');
+            }
+        }
+
+        function showDownloadLink(filename) {
+            const downloadLink = document.getElementById('downloadLink');
+            const downloadBtn = document.getElementById('downloadBtn');
+            
+            downloadBtn.href = `/download_file/${encodeURIComponent(filename)}`;
+            downloadBtn.textContent = `📚 下载 ${filename}`;
+            downloadBtn.download = filename; // 添加download属性
+            downloadBtn.target = '_blank'; // 在新标签页打开
+            downloadLink.style.display = 'block';
+            
+            // 添加点击事件处理
+            downloadBtn.onclick = function(e) {
+                e.preventDefault();
+                // 创建一个临时的a标签来触发下载
+                const tempLink = document.createElement('a');
+                tempLink.href = `/download_file/${encodeURIComponent(filename)}`;
+                tempLink.download = filename;
+                tempLink.style.display = 'none';
+                document.body.appendChild(tempLink);
+                tempLink.click();
+                document.body.removeChild(tempLink);
+                showMessage('开始下载文件喵～', 'success');
+            };
+        }
+
+        function showMessage(message, type) {
+            // 移除之前的消息
+            const existingMessage = document.querySelector('.message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            
+            // 插入到第一个card之前
+            const firstCard = document.querySelector('.card');
+            firstCard.parentNode.insertBefore(messageDiv, firstCard);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

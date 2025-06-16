@@ -411,13 +411,26 @@ class QishuSpider:
                 intro_elem = item.find('dd', class_='book_des')
                 intro = intro_elem.get_text(strip=True) if intro_elem else '搜索结果小说...'
                 
+                # 提取封面图片
+                cover_url = None
+                cover_elem = item.find('img')
+                if cover_elem:
+                    cover_url = cover_elem.get('src') or cover_elem.get('data-src')
+                    # 确保URL是完整的
+                    if cover_url and not cover_url.startswith('http'):
+                        cover_url = urljoin(self.base_url, cover_url)
+                
                 if title != "未知标题" and url:
+                    # 处理简介长度
+                    processed_intro = intro[:100] + '...' if len(intro) > 100 else intro
                     novels.append({
                         'title': title,
                         'author': author,
                         'status': status,
-                        'intro': intro[:100] + '...' if len(intro) > 100 else intro,
-                        'url': url
+                        'intro': processed_intro,  # 保持intro字段
+                        'description': processed_intro,  # 同时提供description字段以确保兼容性
+                        'url': url,
+                        'cover_url': cover_url  # 添加封面URL
                     })
                     print(f"成功添加小说: {title}")
                 else:
@@ -642,7 +655,8 @@ class QishuSpider:
             'title': title,
             'author': author,
             'cover_url': cover_url,
-            'intro': introduction,  # 修改字段名为intro以匹配前端期望
+            'intro': introduction,  # 保持intro字段
+            'description': introduction,  # 同时提供description字段以确保兼容性
             'status': status,
             'url': novel_url
         }
@@ -820,7 +834,7 @@ class QishuSpider:
         <h1>简介</h1>
         <p><strong>作者:</strong> {novel_info['author']}</p>
         <p><strong>状态:</strong> {novel_info['status']}</p>
-        <div>{novel_info['introduction']}</div>
+        <div>{novel_info.get('intro', novel_info.get('description', '暂无简介'))}</div>
         </body>
         </html>
         """

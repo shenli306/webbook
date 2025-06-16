@@ -148,7 +148,9 @@ def download_worker(task_id, novel_url, start_chapter, end_chapter):
                 })
                 
             except Exception as e:
+                import traceback
                 print(f"下载章节失败: {chapter['title']} - {e}")
+                print(f"章节下载详细错误: {traceback.format_exc()}")
                 continue
         
         # 更新状态：生成EPUB
@@ -175,10 +177,15 @@ def download_worker(task_id, novel_url, start_chapter, end_chapter):
         })
         
     except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"下载任务 {task_id} 失败: {str(e)}")
+        print(f"详细错误信息: {error_details}")
         download_status[task_id].update({
             'status': 'error',
             'progress': 0,
             'message': f'下载失败喵: {str(e)}',
+            'error_details': error_details,
             'end_time': datetime.now()
         })
 

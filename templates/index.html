@@ -1,112 +1,427 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐱 猫娘小说下载器</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>波奇酱模式</title>
+    <link rel="stylesheet" href="/static/css/index.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <script src="/static/js/api.js"></script>
 </head>
+
 <body>
+
+    <header>
+        <nav>
+            <div class="logo">
+                <h4>波波波奇酱</h4>
+            </div>
+            <ul>
+                <li><a href="/">首页</a></li>
+                <li><a href="/book">小说</a></li>
+                <li><a href="#">留言</a></li>
+            </ul>
+            <form id="content" onsubmit="return checkSearch(event)">
+                <input type="text" name="input" class="input" id="search-input">
+                <button type="reset" class="search" id="search-btn"></button>
+            </form>
+        </nav>
+        <h1>波奇酱</h1>
+    </header>
+
     <div class="container">
-        <!-- 头部 -->
-        <header class="header">
-            <div class="header-content">
-                <h1 class="title">
-                    <i class="fas fa-cat"></i>
-                    猫娘小说下载器
-                    <span class="subtitle">喵～</span>
-                </h1>
-                <p class="description">轻松下载你喜欢的小说，生成精美的EPUB格式喵～</p>
-            </div>
-        </header>
-
-        <!-- 搜索区域 -->
-        <section class="search-section">
-            <div class="search-container">
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="输入小说名称或作者名喵～" class="search-input">
-                    <button id="searchBtn" class="search-btn">
-                        <i class="fas fa-search"></i>
-                        搜索
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- 搜索结果区域 -->
-        <section class="results-section" id="resultsSection" style="display: none;">
-            <h2 class="section-title">
-                <i class="fas fa-book"></i>
-                搜索结果
-            </h2>
-            <div id="searchResults" class="results-grid"></div>
-        </section>
-
-        <!-- 小说详情区域 -->
-        <section class="novel-detail-section" id="novelDetailSection" style="display: none;">
-            <h2 class="section-title">
-                <i class="fas fa-info-circle"></i>
-                小说详情
-            </h2>
-            <div id="novelDetail" class="novel-detail"></div>
-        </section>
-
-        <!-- 下载设置区域 -->
-        <section class="download-section" id="downloadSection" style="display: none;">
-            <h2 class="section-title">
-                <i class="fas fa-download"></i>
-                下载设置
-            </h2>
-            <div class="download-settings">
-                <div class="setting-group">
-                    <label for="startChapter">起始章节：</label>
-                    <input type="number" id="startChapter" value="1" min="1" class="chapter-input">
-                </div>
-                <div class="setting-group">
-                    <label for="endChapter">结束章节：</label>
-                    <input type="number" id="endChapter" min="1" class="chapter-input" placeholder="留空下载全部">
-                </div>
-                <button id="downloadBtn" class="download-btn">
-                    <i class="fas fa-download"></i>
-                    开始下载
-                </button>
-            </div>
-        </section>
-
-        <!-- 下载进度区域 -->
-        <section class="progress-section" id="progressSection" style="display: none;">
-            <h2 class="section-title">
-                <i class="fas fa-spinner fa-spin"></i>
-                下载进度
-            </h2>
-            <div class="progress-container">
-                <div class="progress-bar">
-                    <div id="progressFill" class="progress-fill"></div>
-                </div>
-                <div id="progressText" class="progress-text">0%</div>
-                <div id="progressMessage" class="progress-message">准备中...</div>
-                <div id="downloadLink" class="download-link" style="display: none;"></div>
-            </div>
-        </section>
-
-        <!-- 加载动画 -->
-        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-            <div class="loading-spinner">
-                <i class="fas fa-cat fa-spin"></i>
-                <p>加载中喵～</p>
-            </div>
+        <!-- 用户信息区域 -->
+        <div id="userInfo" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3>欢迎回来，<span id="userNickname"></span>喵~ (◕ᴗ◕✿)</h3>
         </div>
 
-        <!-- 消息提示 -->
-        <div id="messageToast" class="message-toast"></div>
+
+
     </div>
 
-    <!-- 页脚 -->
-    <footer class="footer">
-        <p>Made with <i class="fas fa-heart"></i> by 可爱白毛傲娇小萝莉 喵～</p>
-    </footer>
+    <div class="content-section">
+        <!-- 左侧主要内容区域 -->
+        <div class="main-content">
+            <!-- 最新资讯区域 -->
+            <div class="news-banner">
+                <div class="news-header">
+                    <h2>最新资讯</h2>
+                </div>
+                <div class="news-list">
+                    <a href="#" class="news-item">
+                        <span class="news-date">2024-03-24</span>
+                        <span class="news-title">网站改版更新公告</span>
+                    </a>
+                    <a href="#" class="news-item">
+                        <span class="news-date">2024-03-23</span>
+                        <span class="news-title">新增MMD模型下载</span>
+                    </a>
+                    <a href="#" class="news-item">
+                        <span class="news-date">2024-03-22</span>
+                        <span class="news-title">Blender教程更新</span>
+                    </a>
+                </div>
+            </div>
 
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+            <!-- 动态资源卡片区域 -->
+            <div class="cards">
+                <div class="card-grid" id="cardGrid">
+                    <!-- 动态加载资源卡片 -->
+                </div>
+                <!-- 分页导航 -->
+                <div class="pagination" id="pagination" style="display: none;">
+                    <!-- 分页按钮将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <!-- 静态卡片已移动到动态资源管理中 -->
+        </div>
+
+        <!-- 右侧边栏 -->
+        <div class="sidebar">
+            <div class="profile-card">
+                <div class="profile-icon" id="profile-avatar">
+                    <img src="/static/img/preview.jpg" alt="波奇酱">
+                    <div class="dropdown-menu" id="dropdown-menu">
+                        <a href="/static/login.html" class="dropdown-item">登录</a>
+                        <a href="/static/register.html" class="dropdown-item">注册</a>
+                    </div>
+                </div>
+                <div class="admin-welcome" id="adminWelcome" style="display: none;">
+                    <p class="welcome-text">欢迎回来，管理员喵~ (◕ᴗ◕✿)</p>
+                </div>
+                <h2 class="profile-name">[&nbsp;&nbsp;&nbsp;]</h2>
+                <p class="profile-desc">0v0</p>
+                <div class="profile-stats">
+                    <div class="stat">
+                        <span class="number">6</span>
+                        <span class="label">文章</span>
+                    </div>
+                    <div class="stat">
+                        <span class="number">9</span>
+                        <span class="label">分类</span>
+                    </div>
+                    <div class="stat">
+                        <span class="number">1024</span>
+                        <span class="label">访问量</span>
+                    </div>
+                    <div class="stat">
+                        <span class="number">8096天</span>
+                        <span class="label">建站天数</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分类目录 -->
+            <div class="tag-section">
+                <h3>资源分类</h3>
+                <div class="tags" id="categoryTags">
+                    <a href="#" class="tag" onclick="filterByCategory('动画')">🎬 动画</a>
+                    <a href="#" class="tag" onclick="filterByCategory('教程')">📚 教程</a>
+                    <a href="#" class="tag" onclick="filterByCategory('素材')">🎨 素材</a>
+                    <a href="#" class="tag" onclick="filterByCategory('工具')">🔧 工具</a>
+                    <a href="#" class="tag" onclick="filterByCategory('其他')">📦 其他</a>
+                    <a href="#" class="tag" onclick="filterByCategory('')">📋 全部</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/index.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        // 全局变量已在api.js中声明
+        let currentSearchKeyword = '';
+        
+        // 页面加载时初始化
+        window.addEventListener('load', function() {
+            checkLoginStatus();
+            loadResources();
+        });
+        
+        // 检查登录状态
+        async function checkLoginStatus() {
+            const token = localStorage.getItem('token');
+            const userInfo = localStorage.getItem('user');
+            
+            if (token && userInfo) {
+                try {
+                    const response = await fetch('/api/user/validate', {
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        currentUser = JSON.parse(userInfo);
+                        showUserInfo();
+                    } else {
+                        logout();
+                    }
+                } catch (error) {
+                    console.error('验证令牌失败:', error);
+                    logout();
+                }
+            }
+        }
+        
+        // 显示用户信息
+        function showUserInfo() {
+            document.getElementById('userInfo').style.display = 'block';
+            document.getElementById('userNickname').textContent = currentUser.nickname || currentUser.username;
+            document.getElementById('loginLink').style.display = 'none';
+            document.getElementById('logoutLink').style.display = 'block';
+            document.getElementById('myResourcesLink').style.display = 'block';
+        }
+        
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            currentUser = null;
+            document.getElementById('userInfo').style.display = 'none';
+            document.getElementById('loginLink').style.display = 'block';
+            document.getElementById('logoutLink').style.display = 'none';
+            document.getElementById('myResourcesLink').style.display = 'none';
+            loadResources(); // 重新加载公共资源
+        }
+        
+
+        
+
+        
+        // 加载资源
+        async function loadResources(page = 1, category = '', append = false) {
+            try {
+                let url = '/api/resources?page=' + page + '&limit=12';
+                let headers = {};
+                
+                // 添加分类筛选参数
+                if (category) {
+                    url += '&category=' + encodeURIComponent(category);
+                }
+                
+                if (currentMode === 'my' && currentUser) {
+                    url = '/api/resource/my?page=' + page + '&limit=12';
+                    if (category) {
+                        url += '&category=' + encodeURIComponent(category);
+                    }
+                    headers['Authorization'] = 'Bearer ' + localStorage.getItem('token');
+                }
+                
+                const response = await fetch(url, { headers });
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayResources(result.data, append);
+                    currentPage = page;
+                    updatePagination(result.total || 0, page);
+                } else {
+                    console.error('加载资源失败:', result.message);
+                }
+            } catch (error) {
+                console.error('加载资源错误:', error);
+            }
+        }
+        
+        // 显示资源
+        function displayResources(resources, append = false) {
+            const cardGrid = document.getElementById('cardGrid');
+            
+            if (resources.length === 0 && !append) {
+                cardGrid.innerHTML = '';
+                return;
+            }
+            
+            if (!append) {
+                cardGrid.innerHTML = '';
+            }
+            
+            resources.forEach(resource => {
+                const card = createResourceCard(resource);
+                cardGrid.appendChild(card);
+            });
+        }
+        
+        // 创建资源卡片
+        function createResourceCard(resource) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            card.innerHTML = `
+                <a href="${resource.previewUrl || resource.downloadUrl}" target="_blank">
+                    <img src="${resource.cover || '/static/img/preview.jpg'}" alt="${resource.title}" onerror="this.src='/static/img/preview.jpg'">
+                    <div class="card-content">
+                        <h3>${resource.title}</h3>
+                        <p>${resource.description}</p>
+                        <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                            <span>分类: ${resource.category}</span>
+                            <span style="margin-left: 15px;">作者: ${resource.authorName}</span>
+                        </div>
+                        <div style="margin-top: 5px; font-size: 12px; color: #666;">
+                            <span>👁️ ${resource.viewCount}</span>
+                            <span style="margin-left: 15px;">⬇️ ${resource.downloadCount}</span>
+                        </div>
+                    </div>
+                </a>
+            `;
+            
+            // 点击时增加浏览量
+            card.addEventListener('click', () => {
+                incrementViewCount(resource.id);
+            });
+            
+            return card;
+        }
+        
+        // 增加浏览量
+        async function incrementViewCount(resourceId) {
+            try {
+                await fetch(`/api/resource/${resourceId}/view`, {
+                    method: 'POST'
+                });
+            } catch (error) {
+                console.error('增加浏览量失败:', error);
+            }
+        }
+        
+        // 显示公共资源
+        function showResources() {
+            currentMode = 'public';
+            currentPage = 1;
+            loadResources();
+        }
+        
+        // 显示我的资源
+        function showMyResources() {
+            if (!currentUser) {
+                alert('请先登录喵~ (>﹏<)');
+                return;
+            }
+            currentMode = 'user';
+            currentPage = 1;
+            loadResources();
+        }
+        
+        // 搜索功能
+        function checkSearch(event) {
+            event.preventDefault();
+            const searchInput = document.querySelector('#content input[type="text"]');
+            const keyword = searchInput.value.trim();
+            
+            if (keyword) {
+                searchResources(keyword);
+            }
+            
+            return false;
+        }
+        
+        // 搜索资源
+        async function searchResources(keyword, page = 1) {
+            try {
+                const response = await fetch(`/api/resources?search=${encodeURIComponent(keyword)}&page=${page}&limit=12`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentMode = 'search';
+                    currentPage = page;
+                    currentSearchKeyword = keyword;
+                    // 搜索结果显示
+                    displayResources(result.data);
+                    updatePagination(result.total || 0, page);
+                } else {
+                    console.error('搜索失败:', result.message);
+                }
+            } catch (error) {
+                console.error('搜索错误:', error);
+            }
+        }
+        
+        // 更新分页导航
+        function updatePagination(total, currentPage) {
+            const totalPages = Math.ceil(total / 12);
+            const paginationContainer = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                paginationContainer.style.display = 'none';
+                return;
+            }
+            
+            paginationContainer.style.display = 'flex';
+            paginationContainer.innerHTML = '';
+            
+            // 上一页按钮
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '上一页';
+            prevBtn.className = 'pagination-btn';
+            prevBtn.disabled = currentPage <= 1;
+            prevBtn.onclick = () => goToPage(currentPage - 1);
+            paginationContainer.appendChild(prevBtn);
+            
+            // 页码按钮
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+            
+            if (startPage > 1) {
+                const firstBtn = document.createElement('button');
+                firstBtn.textContent = '1';
+                firstBtn.className = 'pagination-btn';
+                firstBtn.onclick = () => goToPage(1);
+                paginationContainer.appendChild(firstBtn);
+                
+                if (startPage > 2) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.className = 'pagination-ellipsis';
+                    paginationContainer.appendChild(ellipsis);
+                }
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i;
+                pageBtn.className = 'pagination-btn' + (i === currentPage ? ' active' : '');
+                pageBtn.onclick = () => goToPage(i);
+                paginationContainer.appendChild(pageBtn);
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.className = 'pagination-ellipsis';
+                    paginationContainer.appendChild(ellipsis);
+                }
+                
+                const lastBtn = document.createElement('button');
+                lastBtn.textContent = totalPages;
+                lastBtn.className = 'pagination-btn';
+                lastBtn.onclick = () => goToPage(totalPages);
+                paginationContainer.appendChild(lastBtn);
+            }
+            
+            // 下一页按钮
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = '下一页';
+            nextBtn.className = 'pagination-btn';
+            nextBtn.disabled = currentPage >= totalPages;
+            nextBtn.onclick = () => goToPage(currentPage + 1);
+            paginationContainer.appendChild(nextBtn);
+        }
+        
+        // 跳转到指定页面
+        function goToPage(page) {
+            if (currentMode === 'search' && currentSearchKeyword) {
+                searchResources(currentSearchKeyword, page);
+            } else {
+                loadResources(page);
+            }
+        }
+    </script>
 </body>
+
 </html>

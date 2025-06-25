@@ -1,0 +1,128 @@
+:root {
+    --primary-color: rgb(144, 129, 241);
+    --gradient-start: #e0c3fc;
+    --gradient-end: #8ec5fc;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 10px;
+}
+
+html::before {
+    content: '';
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: -1;
+    background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%) no-repeat;
+}
+
+::selection {
+    color: #fff;
+    background-color: var(--primary-color);
+}
+
+
+.box {
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    width: 90rem;
+    height: 55rem;
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 1.5rem;
+    margin: 10% auto;
+    box-shadow: 0 0 1rem 0.2rem rgb(0 0 0 / 10%);
+}
+
+.login-box {
+    left: 0;
+    z-index: 2;
+}
+
+
+
+.image-side {
+    width: 35%;
+    background-image: url('/static/img/127416.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.form-side {
+    width: 65%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5rem;
+}
+
+h4 {
+    color: var(--primary-color);
+    font-size: 3rem;
+    margin-bottom: 3rem;
+}
+
+form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.acc {
+    width: 100%;
+    height: 5rem;
+    font-size: 1.6rem;
+    margin-bottom: 2rem;
+    padding: 1rem 1.6rem;
+    border: none;
+    border-bottom: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    background-color: transparent;
+}
+
+.submit {
+    width: 60%;
+    height: 5rem;
+    color: #f6f6f6;
+    background-image: linear-gradient(120deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+    font-size: 1.4rem;
+    border: none;
+    border-radius: 0.5rem;
+    margin-top: 3rem;
+    cursor: pointer;
+}
+
+.fn {
+    display: flex;
+    justify-content: space-between;
+    width: 60%;
+    margin-top: 2rem;
+}
+
+.fn a {
+    font-size: 1.3rem;
+    color: #666;
+    text-decoration: none;
+}
+
+.fn a:hover {
+    color: var(--primary-color);
+}
+
+.container.register-active .login-box {
+    transform: translateX(-100%);
+}
+
+.container.register-active .register-box {
+    transform: translateX(0);
+    z-index: 5;
+}

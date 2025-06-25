@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台管理系统 - 资源分享平台</title>
+    <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>萌萌管理后台</h2>
+                <p class="admin-info">当前用户：<span id="adminName">未登录</span></p>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#" onclick="showDashboard()" class="nav-item active">📊 仪表盘</a></li>
+                    <li><a href="#" onclick="showUsers()" class="nav-item">👥 用户管理</a></li>
+                    <li><a href="#" onclick="showResources()" class="nav-item">📁 资源管理</a></li>
+                    <li><a href="#" onclick="showSettings()" class="nav-item">⚙️ 系统设置</a></li>
+                    <li><a href="#" onclick="logout()" class="nav-item logout">🚪 退出登录</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 头部 -->
+            <header class="content-header">
+                <h1 id="pageTitle">仪表盘</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="refreshData()">刷新数据</button>
+                </div>
+            </header>
+
+            <!-- 内容区域 -->
+            <div class="content-body">
+                <!-- 仪表盘 -->
+                <div id="dashboard" class="content-section active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>👥 萌萌用户数</h3>
+                            <p class="stat-number" id="totalUsers">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>📁 可爱资源数</h3>
+                            <p class="stat-number" id="totalResources">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>🌟 今日新萌友</h3>
+                            <p class="stat-number" id="todayUsers">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>✨ 今日新资源</h3>
+                            <p class="stat-number" id="todayResources">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户管理 -->
+                <div id="users" class="content-section">
+                    <div class="section-header">
+                        <h2>👥 萌友管理中心</h2>
+                        <div class="search-box">
+                            <input type="text" id="userSearch" placeholder="🔍 搜索可爱的萌友们...">
+                            <button onclick="searchUsers()">🔍 搜索</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table id="usersTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>用户名</th>
+                                    <th>邮箱</th>
+                                    <th>注册时间</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- 动态加载用户数据 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 资源管理 -->
+                <div id="resources" class="content-section">
+                    <div class="section-header">
+                        <h2>📁 萌萌资源管理</h2>
+                        <div class="header-actions">
+                            <button class="btn btn-primary" onclick="showAddResourceModal()">✨ 添加新资源</button>
+                            <div class="search-box">
+                                <input type="text" id="resourceSearch" placeholder="🔍 搜索可爱资源...">
+                                <button onclick="searchResources()">🔍 搜索</button>
+                            </div>
+                            <div class="sort-box">
+                                <select id="resourceSort" onchange="sortResources()">
+                                    <option value="created_at_desc">📅 最新发布</option>
+                                    <option value="created_at_asc">📅 最早发布</option>
+                                    <option value="title_asc">🔤 标题A-Z</option>
+                                    <option value="title_desc">🔤 标题Z-A</option>
+                                    <option value="category_asc">📂 分类A-Z</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 资源卡片展示区域 -->
+                    <div class="resources-grid" id="resourcesGrid">
+                        <!-- 动态加载资源卡片 -->
+                    </div>
+                    
+                    <!-- 原有的表格视图（可选择显示） -->
+                    <div class="table-container" id="resourcesTableContainer" style="display: none;">
+                        <div class="view-toggle">
+                            <button class="btn btn-sm" onclick="toggleResourceView('grid')">🎴 卡片视图</button>
+                            <button class="btn btn-sm" onclick="toggleResourceView('table')">📋 表格视图</button>
+                        </div>
+                        <table id="resourcesTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>标题</th>
+                                    <th>作者</th>
+                                    <th>分类</th>
+                                    <th>发布时间</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resourcesTableBody">
+                                <!-- 动态加载资源数据 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 系统设置 -->
+                <div id="settings" class="content-section">
+                    <div class="section-header">
+                        <h2>系统设置</h2>
+                    </div>
+                    <div class="settings-form">
+                        <div class="form-group">
+                            <label>网站标题</label>
+                            <input type="text" id="siteTitle" value="资源分享平台">
+                        </div>
+                        <div class="form-group">
+                            <label>网站描述</label>
+                            <textarea id="siteDescription" rows="3">一个优秀的资源分享平台</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>允许注册</label>
+                            <input type="checkbox" id="allowRegister" checked>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" onclick="saveSettings()">保存设置</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modalBody">
+                <!-- 动态内容 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/admin/admin.js"></script>
+</body>
+</html>

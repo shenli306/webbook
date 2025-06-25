@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信自动回复</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to right, #ff89eb, #a7e9ff);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #444;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .step {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .step h3 {
+            color: #555;
+            margin-top: 0;
+        }
+
+        .step p {
+            color: #666;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        .code-block {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: monospace;
+        }
+
+        .note {
+            background: rgba(255, 235, 59, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .note p {
+            margin: 0;
+            color: #795548;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>微信自动回复设置教程</h1>
+
+        <div class="section">
+            <h2>基本设置步骤</h2>
+            
+            <div class="step">
+                <h3>步骤1：下载并安装微信机器人</h3>
+                <p>首先需要下载并安装微信机器人软件。推荐使用以下工具之一：</p>
+                <ul>
+                    <li>WeChat Bot</li>
+                    <li>WeChatEvolution</li>
+                    <li>itchat</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <h3>步骤2：配置自动回复规则</h3>
+                <p>在机器人软件中设置关键词和对应的回复内容：</p>
+                <div class="code-block">
+                    示例规则：
+                    关键词：你好
+                    回复：您好！这是自动回复消息。
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>步骤3：启动自动回复</h3>
+                <p>完成配置后，启动自动回复功能：</p>
+                <ol>
+                    <li>打开机器人软件</li>
+                    <li>扫描登录微信</li>
+                    <li>开启自动回复功能</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>高级功能</h2>
+            
+            <div class="step">
+                <h3>定时消息</h3>
+                <p>可以设置在特定时间发送消息：</p>
+                <div class="code-block">
+                    时间：每天 9:00
+                    消息：早上好！今天也要元气满满哦！
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>群消息管理</h3>
+                <p>可以设置群聊的自动回复规则：</p>
+                <ul>
+                    <li>自动欢迎新成员</li>
+                    <li>关键词触发回复</li>
+                    <li>定时群发消息</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="note">
+            <p>注意：请合理使用自动回复功能，避免打扰他人或违反微信使用规则。</p>
+        </div>
+
+        <a href="index.html" class="back-btn">返回首页</a>
+    </div>
+</body>
+</html>

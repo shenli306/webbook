@@ -29,13 +29,29 @@ class QishuSpider:
     def __init__(self):
         self.session = requests.Session()
         self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3',
-            'Accept-Encoding': 'gzip, deflate',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
             'Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Cache-Control': 'max-age=0'
         })
+        # 设置重试机制
+        from requests.adapters import HTTPAdapter
+        from urllib3.util.retry import Retry
+        retry_strategy = Retry(
+            total=3,
+            backoff_factor=1,
+            status_forcelist=[429, 500, 502, 503, 504],
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        self.session.mount("http://", adapter)
+        self.session.mount("https://", adapter)
+        
         self.base_url = 'https://www.qishu.vip'
         
     def search_novels(self, keyword, page=1):
@@ -45,20 +61,26 @@ class QishuSpider:
             
             # 设置浏览器headers
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebLib/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
                 'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-                'Accept-Encoding': 'gzip, deflate',
-                'Referer': f"{self.base_url}/search.html"
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Referer': f"{self.base_url}/search.html",
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'same-origin',
+                'Cache-Control': 'max-age=0'
             }
             
             # 方法1: 使用POST方法提交搜索表单
             try:
                 print("尝试POST方式搜索...")
                 search_url = f"{self.base_url}/search.html"
+                # 根据浏览器测试，使用正确的表单字段名
                 data = {
                     'searchkey': keyword,
-                    'searchtype': 'all'
+                    'searchtype': 'all',
+                    'submit': '搜索'  # 添加提交按钮值
                 }
                 
                 headers_post = headers.copy()
@@ -66,12 +88,20 @@ class QishuSpider:
                 headers_post['Origin'] = self.base_url
                 headers_post['Referer'] = f"{self.base_url}/search.html"
                 
-                response = self.session.post(search_url, data=data, headers=headers_post, timeout=10, allow_redirects=True)
+                response = self.session.post(search_url, data=data, headers=headers_post, timeout=15, allow_redirects=True)
                 response.encoding = 'utf-8'
                 
                 print(f"POST搜索响应状态码: {response.status_code}")
                 print(f"最终URL: {response.url}")
                 print(f"页面内容长度: {len(response.text)}")
+                
+                # 调试：检查返回的页面内容
+                if '搜索结果' in response.text or 'search' in response.url.lower():
+                    print("✓ 检测到搜索相关内容")
+                else:
+                    print("✗ 未检测到搜索相关内容，可能需要不同的搜索方式")
+                    # 打印页面的前500个字符用于调试
+                    print(f"页面内容预览: {response.text[:500]}...")
                 
                 if response.status_code == 200:
                     # 直接尝试解析，不依赖特定关键词检测
@@ -108,7 +138,44 @@ class QishuSpider:
             except Exception as e:
                 print(f"POST搜索失败: {e}")
             
-            # 方法2: 尝试使用搜索API（如果存在）
+            # 方法2: 尝试GET方式搜索
+            try:
+                print("尝试GET方式搜索...")
+                get_search_urls = [
+                    f"{self.base_url}/search.html?searchkey={quote(keyword)}&searchtype=all",
+                    f"{self.base_url}/search?q={quote(keyword)}",
+                    f"{self.base_url}/s/{quote(keyword)}.html"
+                ]
+                
+                for get_url in get_search_urls:
+                    try:
+                        print(f"尝试GET搜索: {get_url}")
+                        response = self.session.get(get_url, headers=headers, timeout=15, allow_redirects=True)
+                        response.encoding = 'utf-8'
+                        
+                        print(f"GET搜索响应状态码: {response.status_code}")
+                        print(f"GET搜索最终URL: {response.url}")
+                        
+                        if response.status_code == 200:
+                            # 检查是否重定向到搜索结果页面
+                            if '/search/' in response.url and ('.html' in response.url or response.url.endswith('/1')):
+                                print("✓ GET搜索成功重定向到结果页面")
+                                results = self.parse_search_results(response.text)
+                                if results:
+                                    print(f"GET搜索成功！找到 {len(results)} 个结果")
+                                    return results
+                            elif 'sitembox' in response.text or '搜索结果' in response.text:
+                                print("✓ GET搜索找到搜索结果内容")
+                                results = self.parse_search_results(response.text)
+                                if results:
+                                    return results
+                    except Exception as e:
+                        print(f"GET搜索失败: {e}")
+                        continue
+            except Exception as e:
+                print(f"GET搜索方法失败: {e}")
+            
+            # 方法3: 尝试使用搜索API（如果存在）
             api_urls = [
                 f"{self.base_url}/api/search?q={quote(keyword)}",
                 f"{self.base_url}/search.php?searchkey={quote(keyword)}",
@@ -118,7 +185,7 @@ class QishuSpider:
             for api_url in api_urls:
                 try:
                     print(f"尝试API搜索: {api_url}")
-                    response = self.session.get(api_url, headers=headers, timeout=10)
+                    response = self.session.get(api_url, headers=headers, timeout=15)
                     response.encoding = 'utf-8'
                     
                     if response.status_code == 200 and ('搜索结果' in response.text or 'sitembox' in response.text):
@@ -134,7 +201,7 @@ class QishuSpider:
                 print("尝试通过搜索页面获取搜索结果...")
                 # 先访问搜索页面，然后提交搜索表单
                 search_page_url = f"{self.base_url}/search.html"
-                response = self.session.get(search_page_url, headers=headers, timeout=10)
+                response = self.session.get(search_page_url, headers=headers, timeout=15)
                 
                 if response.status_code == 200:
                     # 提交搜索表单
@@ -149,7 +216,7 @@ class QishuSpider:
                     headers_post['Origin'] = self.base_url
                     headers_post['Referer'] = search_page_url
                     
-                    response = self.session.post(search_page_url, data=search_data, headers=headers_post, timeout=10, allow_redirects=True)
+                    response = self.session.post(search_page_url, data=search_data, headers=headers_post, timeout=15, allow_redirects=True)
                     response.encoding = 'utf-8'
                     
                     print(f"搜索表单提交后的URL: {response.url}")
@@ -195,7 +262,7 @@ class QishuSpider:
             try:
                 print("尝试模拟浏览器JavaScript搜索...")
                 # 访问首页，然后使用JavaScript提交搜索
-                response = self.session.get(self.base_url, headers=headers, timeout=10)
+                response = self.session.get(self.base_url, headers=headers, timeout=15)
                 if response.status_code == 200:
                     # 构造搜索请求，模拟前端JavaScript行为
                     search_url = f"{self.base_url}/search.html"
@@ -337,31 +404,37 @@ class QishuSpider:
         print(f"HTML长度: {len(html)}")
         print(f"页面标题: {soup.title.text if soup.title else '无标题'}")
         
-        # 尝试多种可能的搜索结果容器
-        result_containers = [
-            soup.find('div', id='sitembox'),
-            soup.find('div', class_='coverecom'),
-            soup.find('div', class_='result'),
-            soup.find('div', class_='search-result'),
-            soup.find('div', class_='book-list'),
-            soup.find('ul', class_='result-list'),
-            soup.find('div', class_='list')
-        ]
+        # 根据浏览器测试结果，直接使用正确的CSS选择器
+        result_container = soup.find('div', id='sitembox')
         
-        result_container = None
-        for container in result_containers:
-            if container:
-                result_container = container
-                print(f"找到搜索结果容器: {container.name} with {container.get('class', [])} {container.get('id', '')}")
-                break
-        
-        if not result_container:
-            print("未找到搜索结果容器，尝试在整个页面中查找小说链接")
-            # 如果没有找到特定容器，在整个页面中查找可能的小说链接
-            result_container = soup
-        
-        result_items = result_container.find_all('dl')
-        print(f"找到 {len(result_items)} 个搜索结果")
+        if result_container:
+            print(f"找到搜索结果容器: #sitembox")
+            # 使用正确的选择器：#sitembox dl
+            result_items = result_container.find_all('dl')
+            print(f"在#sitembox中找到 {len(result_items)} 个dl元素")
+        else:
+            print("未找到#sitembox容器，尝试备用方案")
+            # 备用方案：直接在整个页面查找dl元素
+            result_items = soup.find_all('dl')
+            print(f"在整个页面找到 {len(result_items)} 个dl元素")
+            
+            # 如果还是没有找到，尝试其他可能的容器
+            if not result_items:
+                backup_containers = [
+                    soup.find('div', class_='coverecom'),
+                    soup.find('div', class_='result'),
+                    soup.find('div', class_='search-result'),
+                    soup.find('div', class_='book-list'),
+                    soup.find('ul', class_='result-list'),
+                    soup.find('div', class_='list')
+                ]
+                
+                for container in backup_containers:
+                    if container:
+                        result_items = container.find_all('dl')
+                        if result_items:
+                            print(f"在备用容器中找到 {len(result_items)} 个搜索结果")
+                            break
         
         for i, item in enumerate(result_items):
             try:
@@ -491,7 +564,7 @@ class QishuSpider:
     def get_page(self, url):
         """获取页面内容喵～"""
         try:
-            response = self.session.get(url, timeout=10)
+            response = self.session.get(url, timeout=15)
             response.encoding = 'utf-8'
             if response.status_code == 200:
                 return response.text
@@ -770,6 +843,24 @@ class QishuSpider:
         content = self.get_chapter_content(url)
         return (index, title, content)
     
+    def download_chapters_singlethread(self, chapters):
+        """单线程下载章节内容喵～"""
+        print(f"开始单线程下载 {len(chapters)} 个章节喵～")
+        
+        downloaded_chapters = []
+        
+        for i, chapter in enumerate(chapters):
+            try:
+                print(f"正在下载第{i + 1}章: {chapter['title']}...喵")
+                content = self.get_chapter_content(chapter['url'])
+                downloaded_chapters.append({'title': chapter['title'], 'content': content})
+                print(f"完成第{i + 1}章: {chapter['title']} ({i + 1}/{len(chapters)})喵")
+            except Exception as e:
+                print(f"下载章节失败: {chapter['title']} - {e}")
+                downloaded_chapters.append({'title': f"{chapter['title']}（下载失败）", 'content': "章节内容获取失败喵～"})
+        
+        return downloaded_chapters
+    
     def download_chapters_multithread(self, chapters, max_workers=8):
         """多线程下载章节内容，保证顺序喵～"""
         print(f"开始多线程下载 {len(chapters)} 个章节，使用 {max_workers} 个线程喵～")
@@ -799,8 +890,8 @@ class QishuSpider:
         
         return ordered_chapters
     
-    def create_epub(self, novel_info, chapters, output_path):
-        """创建EPUB文件喵～使用多线程下载"""
+    def create_epub(self, novel_info, chapters, output_path, use_multithread=False):
+        """创建EPUB文件喵～可选择单线程或多线程下载"""
         print("正在生成EPUB文件...喵～")
         
         book = epub.EpubBook()
@@ -846,8 +937,12 @@ class QishuSpider:
             print("章节内容已存在，直接使用喵～")
             downloaded_chapters = chapters
         else:
-            print("开始多线程下载章节内容喵～")
-            downloaded_chapters = self.download_chapters_multithread(chapters, max_workers=8)
+            if use_multithread:
+                print("开始多线程下载章节内容喵～")
+                downloaded_chapters = self.download_chapters_multithread(chapters, max_workers=8)
+            else:
+                print("开始单线程下载章节内容喵～")
+                downloaded_chapters = self.download_chapters_singlethread(chapters)
         
         # 添加章节到EPUB
         epub_chapters = [intro_chapter]
@@ -918,7 +1013,7 @@ class QishuSpider:
         filename = f"{novel_info['title']}.epub"
         output_path = os.path.join(output_dir, filename)
         
-        self.create_epub(novel_info, chapters, output_path)
+        self.create_epub(novel_info, chapters, output_path, use_multithread=False)
         
         print("\n=== 爬取完成 ===")
         print(f"小说标题: {novel_info['title']}")
@@ -947,9 +1042,19 @@ class QishuSpider:
             chrome_options.add_argument('--window-size=1920,1080')
             chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
             
-            # 创建WebDriver
-            service = Service(ChromeDriverManager().install())
-            driver = webdriver.Chrome(service=service, options=chrome_options)
+            # 创建WebDriver - 避免网络下载问题，使用系统PATH中的chromedriver
+            try:
+                # 首先尝试使用系统PATH中的chromedriver
+                driver = webdriver.Chrome(options=chrome_options)
+            except Exception as e:
+                print(f"使用系统chromedriver失败: {e}")
+                # 如果系统PATH中没有chromedriver，尝试下载
+                try:
+                    service = Service(ChromeDriverManager().install())
+                    driver = webdriver.Chrome(service=service, options=chrome_options)
+                except Exception as download_error:
+                    print(f"下载chromedriver失败: {download_error}")
+                    raise Exception("无法启动Chrome浏览器，请确保已安装Chrome和chromedriver")
             driver.set_page_load_timeout(30)
             
             print("访问奇书网首页...")
